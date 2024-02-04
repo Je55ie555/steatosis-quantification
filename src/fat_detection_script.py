@@ -558,7 +558,6 @@ def run_workflow(
     run_hovernet,
     hovernet_command,
     data_saver_mode,
-    PRAC_IMG,
     imgs_to_process
 ):
     print("Running 'run_workflow' in helpers_merged_with_rest.py\n")
@@ -566,7 +565,7 @@ def run_workflow(
     counter = 0
     print(file_location)
     for file in os.listdir(file_location):
-        if (((file.endswith(file_type)) & (file == PRAC_IMG)) or ((file.endswith(file_type)) & (PRAC_IMG==""))) or (any([file in i for i in imgs_to_process]) & (file.endswith(file_type))):
+        if (any([file in i for i in imgs_to_process]) & (file.endswith(file_type))):
             
             print(f"- Processing file: {file}")
             

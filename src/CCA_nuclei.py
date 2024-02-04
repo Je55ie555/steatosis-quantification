@@ -357,7 +357,7 @@ def run_CCA(base_path, fat_path, max_distance, experiment_name, removed_df_label
             cca_df.to_pickle(f"{base_path}{experiment_name}/CCA_dfs/{name}_{experiment_name}_global_CCA.pkl")
             
                                         
-    return processed
+    
 
 def get_patch_data(path, patch_size):
     r = {}

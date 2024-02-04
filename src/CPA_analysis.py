@@ -83,7 +83,6 @@ def detect_CPA(
     FILLED_BG_HOLE_SIZE,
     FILLED_FG_HOLE_SIZE,
     KERNEL,
-    PRAC_IMG,
     imgs_to_process
 ):
     print("LOGS 'run_workflow': \n")
@@ -91,7 +90,7 @@ def detect_CPA(
     print(file_location)
     dfl = []
     for file in os.listdir(file_location):
-        if (((file.endswith(file_type)) & (file == PRAC_IMG)) or ((file.endswith(file_type)) & (PRAC_IMG==""))) or (any([file in i for i in imgs_to_process]) & (file.endswith(file_type))):
+        if (any([file in i for i in imgs_to_process]) & (file.endswith(file_type))):
             
             
             print(f"- Processing file: {file}")
