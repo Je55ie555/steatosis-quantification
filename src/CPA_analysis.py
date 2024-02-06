@@ -90,7 +90,9 @@ def detect_CPA(
     print(file_location)
     dfl = []
     for file in os.listdir(file_location):
-        if (any([file in i for i in imgs_to_process]) & (file.endswith(file_type))):
+
+
+        if (any([file in i for i in imgs_to_process]) & (file.endswith(file_type))) or ((len(imgs_to_process)==0) & (file.endswith(file_type))):
             
             
             print(f"- Processing file: {file}")
@@ -120,8 +122,8 @@ def detect_CPA(
         
             """adjust parameters to mpp"""
             print(f"----------adjusting default parameters to wsi scan")
-            subpatch_sizes = [] # just a filler to run convert_and_adjust
-            min_fat_area, max_fat_area, filled_fg_hole_size, filled_bg_hole_size, kernel, mag_factor, patch_size, subpatch_sizes = convert_and_adjust(mpp, MIN_FAT_AREA, MAX_FAT_AREA, FILLED_BG_HOLE_SIZE, FILLED_FG_HOLE_SIZE, KERNEL, PATCH_SIZE, SUBPATCH_SIZES)
+            
+            min_fat_area, max_fat_area, filled_fg_hole_size, filled_bg_hole_size, kernel, mag_factor, patch_size = convert_and_adjust(mpp, MIN_FAT_AREA, MAX_FAT_AREA, FILLED_BG_HOLE_SIZE, FILLED_FG_HOLE_SIZE, KERNEL, PATCH_SIZE)
             
             area_threshold_of_tissue_to_remove = (PATCH_SIZE * PATCH_SIZE *.05)/(mpp*2) #tissue object must take up at least 5% of area of patch
             
@@ -247,8 +249,6 @@ def detect_CPA(
                             labels_original = kmeans.fit_predict(transformed_pixels_detected_tissue)
                             
                            
-                            
-                            
                             
                             #predict on whole patch
                             #print("transforming HSV color space")

@@ -200,7 +200,7 @@ def convert_from_um_to_mpp(is_area, mpp, um):
     return pixels
 
 
-def convert_and_adjust(mpp, min_fat_area, max_fat_area, filled_bg_hole_size, filled_fg_hole_size, kernel, patch_size, subpatch_sizes):
+def convert_and_adjust(mpp, min_fat_area, max_fat_area, filled_bg_hole_size, filled_fg_hole_size, kernel, patch_size):
     """ adjusts default parameters to magnification/scan size of the wsi, based on pixel size.
      Default parameters were calculated at mpps:013913085559427"""
 
@@ -211,7 +211,7 @@ def convert_and_adjust(mpp, min_fat_area, max_fat_area, filled_bg_hole_size, fil
     filled_fg_hole_size = convert_from_um_to_mpp(is_area=True, mpp=mpp, um=filled_fg_hole_size)
     kernel = convert_from_um_to_mpp(is_area=False, mpp=mpp, um=kernel)
     patch_size = int(convert_from_um_to_mpp (is_area=False, mpp=mpp, um=patch_size))
-    subpatch_sizes = [int(convert_from_um_to_mpp(is_area=False, mpp=mpp, um=x)) for x in subpatch_sizes]
+    
     
 
     #adjusts default parameters to magnification
@@ -229,7 +229,7 @@ def convert_and_adjust(mpp, min_fat_area, max_fat_area, filled_bg_hole_size, fil
         filled_bg_hole_size = filled_bg_hole_size/area_adjustment
         kernel = int(kernel/int_factor)
         mag_factor = int_factor
-    return min_fat_area, max_fat_area, filled_fg_hole_size, filled_bg_hole_size, kernel, mag_factor, patch_size, subpatch_sizes
+    return min_fat_area, max_fat_area, filled_fg_hole_size, filled_bg_hole_size, kernel, mag_factor, patch_size
 
 def return_scanned_parts(img, img_type): 
     """ returns subsection of img that contains information as an array"""
@@ -553,26 +553,27 @@ def run_workflow(
     FILLED_FG_HOLE_SIZE,
     file_type,
     KERNEL,
-    SUBPATCH_SIZES,
+    SUBPATCH_SIZES_FACTOR,
     hovernet_master_loc,
     run_hovernet,
     hovernet_command,
     data_saver_mode,
     imgs_to_process
 ):
-    print("Running 'run_workflow' in helpers_merged_with_rest.py\n")
+    
     print("LOGS 'run_workflow': \n")
     counter = 0
     print(file_location)
     for file in os.listdir(file_location):
-        if (any([file in i for i in imgs_to_process]) & (file.endswith(file_type))):
+    
+        if (any([file in i for i in imgs_to_process]) & (file.endswith(file_type))) or ((len(imgs_to_process)==0) & (file.endswith(file_type))):
             
             print(f"- Processing file: {file}")
             
            
 
             """open images. Currently supported datatypes mrxs and czi """
-            print(f"----------opening wsi to determining global threshold")
+            print(f"---------- opening wsi to determining global threshold")
             target= 4.45 # target mpp, corresponds to dev pic level 5 mpp. Used for development
             wsi_img_array, mag, scanned_height, scanned_width, start_x, start_y, finish_x, finish_y, mpp, f, img_type, wsi = open_wsi (file_location, file, target)
             
@@ -581,41 +582,39 @@ def run_workflow(
             output_loc = f"{run_path}/{f}/dataframes/"
             binary_loc = f"{run_path}/{f}/saved_patches/binary_patches/"
             fat_loc = f"{run_path}/{f}/saved_patches/fat_patches/"
-            hovernet_loc = f"{run_path}/{f}/temporary_data/"
-           
             
            
             print(f"             |_ location dataframe & csv storage :{output_loc}")
             print(f"             |_ location binary patch storage :{binary_loc}")
             print(f"             |_ location fat patch storage :{fat_loc}")
-            print(f"             |_ location hovernet storage (if hovernet enabled):{hovernet_loc}")
-            print(f"/////////////////////////// DATA SAVER MODE ACTIVATED: {data_saver_mode}")
+            
 
+            if run_hovernet:
+                hovernet_loc = f"{run_path}/{f}/temporary_data/"
+                print(f"             |_ location hovernet storage (if hovernet enabled):{hovernet_loc}")
+        
             Path(f"{output_loc}").mkdir(parents=True, exist_ok=True)
             Path(f"{fat_loc}").mkdir(parents=True, exist_ok=True)
             Path(f"{binary_loc}").mkdir(parents=True, exist_ok=True)
            
-            
             csv = create_csv(f=f, csv_files_path=output_loc)
         
             """adjust parameters to mpp"""
-            print(f"----------adjusting default parameters to wsi scan")
-            min_fat_area, max_fat_area, filled_fg_hole_size, filled_bg_hole_size, kernel, mag_factor, patch_size, subpatch_sizes = convert_and_adjust(mpp, MIN_FAT_AREA, MAX_FAT_AREA, FILLED_BG_HOLE_SIZE, FILLED_FG_HOLE_SIZE, KERNEL, PATCH_SIZE, SUBPATCH_SIZES)
+            print(f"---------- adjusting default parameters to wsi scan")
+
+            min_fat_area, max_fat_area, filled_fg_hole_size, filled_bg_hole_size, kernel, mag_factor, patch_size = convert_and_adjust(mpp, MIN_FAT_AREA, MAX_FAT_AREA, FILLED_BG_HOLE_SIZE, FILLED_FG_HOLE_SIZE, KERNEL, PATCH_SIZE)
             
             
             ## subpatch_size must evenly divide into patch_size! 
-            assert len(subpatch_sizes) == 1
-            patch_size = int(math.ceil(patch_size/20) * 20)
-            subpatch_sizes = [int(patch_size/20)]
+            print(f"------- original patch_size: {patch_size}")
+            patch_size = int(math.ceil(patch_size/SUBPATCH_SIZES_FACTOR) * SUBPATCH_SIZES_FACTOR)
+            print(f"-------- patch_size adjusted for even fitting of subpatches: {patch_size}")
+            print(f"------- number of subpatches in a patch: {SUBPATCH_SIZES_FACTOR}")
+            subpatch_sizes = [int(patch_size/SUBPATCH_SIZES_FACTOR)]
             
-            print("mapping patch size to a suitable value for subpatch processing")
-            print("patch_size in pxs: ", patch_size, "= ", patch_size * mpp, " micrometer")
-            print("subpatch_size in pxs: ", subpatch_sizes[0],  "= ", subpatch_sizes[0] * mpp, " micrometer")
-            
-           
-            print(f"----------calculating global threshold")
+            print("----------  mapping patch size to a suitable value for subpatch processing")
+            print(f"---------- calculating global threshold")
             g_threshold = global_threshold(wsi_img_array, img_type)
-            print(g_threshold, "global threshold")
             
             if run_hovernet:
                 stored_patches = []
@@ -623,12 +622,12 @@ def run_workflow(
 
             key = 0
             subpatch_analysis = []
-            print(f"----------total number of patches in wsi (at patch size {patch_size} (px)): { math.ceil(float(scanned_width / patch_size)) * math.ceil(float(scanned_height / patch_size))}")
-            print("----------processing patch number:")
+            print(f"---------- total number of patches in wsi (at patch size {patch_size} (px)): { math.ceil(float(scanned_width / patch_size)) * math.ceil(float(scanned_height / patch_size))}")
+            print("---------- processing patch number:")
             for coords_y in range(start_y, finish_y, patch_size):
                 for coords_x in range(start_x, finish_x, patch_size):
                     print("             |_ ", key)
-                    if(key>=0) :#keep in case a particular patch key is of interest :)
+                    if (key >= 0) & (key <= 5):#keep in case a particular patch key is of interest :)
 
                         patch = open_patch(img_type, wsi, wsi_img_array, coords_x, coords_y, patch_size, patch_level) 
                         scanned_patch = return_scanned_parts(img=patch, img_type=img_type)
@@ -641,7 +640,7 @@ def run_workflow(
                                 kernel=kernel
                             ))
 
-                        print("                 |_finished preprocessing")
+
                         
                         patch_with_fat_objects, forground_area = object_analysis( 
                             closed_patch=closed_patch,
@@ -665,7 +664,6 @@ def run_workflow(
                         )
                         
 
-                        print("                 |_finished object processing")
                         
                         preprocessed_patch[scanned_patch==0] = 1 # fill in unscanned regions as background
                         
@@ -685,14 +683,14 @@ def run_workflow(
                                     patches_stored += 1
 
                             if len(subpatch_sizes) > 0:
-                                print("                 |_starting subpatch analysis")
+                                
                                 total_foreground_area = 0
                                 total_fat_area = 0
                                
                                 
 
                                 for size in subpatch_sizes:
-                                    print(size)
+                                    
                                     subpatch_analysis, ba, fa = process_subpatches(preprocessed_patch=preprocessed_patch, size=size, patch_size=patch_size, subpatch_analysis=subpatch_analysis, scanned=scanned_patch, patch_with_fat=patch_with_fat_objects, coords_x=coords_x, coords_y=coords_y, key=key, mpp=mpp)
                                     total_foreground_area += ba
                                     total_fat_area += fa

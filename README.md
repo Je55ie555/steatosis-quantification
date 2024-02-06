@@ -41,7 +41,7 @@ To start: call run_workflow() in run_fat_and_nuclei_detection.py.
 * `WSI-file-type` (str) 
     * can be “.mrxs” or “.czi”.
 * `WSI-queue` (list of str) 
-    * a list of all the images in the file_loc that you wish to process. If imgs_to_process = [], all files with FILE_TYPE in file_loc are processed.
+    * A list of comma separated file names as a string, ie 'file_a,file_b' [no spaces!] of the WSIs to be processed in the input directory. When not specified, all files with the given file_type in the directory are processed. Default = "".
 * `PATCH_SIZE` (int) 
     * patch size in micrometers. Patches are always processed in square. Default is 1500x1500 µm<sup>2</sup>.
 * `PATCH_LEVEL` (int) 
@@ -58,8 +58,8 @@ To start: call run_workflow() in run_fat_and_nuclei_detection.py.
     * fills in objects in the background. Default: is calculated from MAX_AREA.
 * `MAX_AXIS_RATIO` (int) 
     * maximum axis ratio of a fat vesivle. Default: 2.
-* `SUBPATCH_SIZES` (list of ints in micrometers)
-    * Use if a patch should be calculated into smaller subpatches (in µm) for a higher “resolution” of results. Again, subpatches always are processed as squares. Default: 70x70 µm<sup>2</sup>.
+* `SUBPATCH_SIZES_FACTOR` (int)
+    * int representing how many subpatches a patch will be divided into. Default=20.
 * `DISK`(float, in µm)
     * Kernel used image preprocessing. Default: 8.3478513356562
 * Nucleus Detection Parameters (see [HoVer-Net Repo](https://github.com/vqdang/hover_net) for more information).
@@ -73,11 +73,36 @@ To start: call run_workflow() in run_fat_and_nuclei_detection.py.
     * `hovernet-run-function` (str) 
         * Default: “./run_infer.py”
     * `data_saver_mode` (bool) 
-        *### WHAT HAPPENS HERE AGAIN???
-        * Default = False 
+        * if data_saver_mode = True, unused HoVer-Net output (overlays and mat files) are automatically deleted.
+        * Default = False
+
+Example:
+python .\src\run_fat_and_nuclei_detection.py\
+--input-dir "F:\test\test_img\"\
+--output-dir "F:\test\test_cli"\
+--output-folder-name "fat_and_nuclei_detection"\
+--hovernet-dir "F:\test\hover_net-master"\
+--hovernet-weights-file "F:\test\hover_net-master\hovernet_original_kumar_notype_tf2pytorch.tar"`\
+--WSI-file-type ".mrxs"\
+--WSI-queue "test_img_HE.mrxs"\
+--patch-size "1500"\
+--patch-level "0"\
+--min-fat-vesicle-area "40"\
+--max-fat-vesicle-area "10000"\
+--min-extent "0.5"\
+--max-axis-ratio "2"\
+--subpatch-size-factor "20"\
+--disk "8.35"\
+--run-hovernet\
+--hovernet-gpu "0"\
+--hovernet-num-nuc-types "0"\
+--hovernet-model-mode "original"\
+--hovernet-run-function "./run_infer.py"\
+--data-saver-mode
+
 
 #### Output:
-Each file is processed, and output for each file is stored in various dataframes. These dataframes contain information about tissue area, fat area, fat objects, mpp, and, if wished, nuclei information. For more information about the contents of these dataframes, see data_analysis_example.ipynb. 
+Each file is processed, and output for each file is stored in various dataframes. These dataframes contain information about tissue area, fat area, fat objects, mpp, and, if wished, nuclei information. For more information about the contents of these dataframes, see fat_and_nucleus_data_analysis_example.ipynb. 
 * location: [`output-dir`]/[`output-folder-name`]/dataframes/
     * [file_name]_data.csv (dataframe)
         * Contains data about each potential fat object that was detected, as well as information about the processed patch.
@@ -97,7 +122,7 @@ Each file is processed, and output for each file is stored in various dataframes
 
 
 
-    ### Nucleus Cluster Analysis
+### Nucleus Cluster Analysis
 
 This code takes information about nuclei location (information gained by enabling the HoVer-Net option in the fat and nucleus detection script), and analyzes the nuclei distributions to find nearest neighbors. The script returns information about nuclei clusters, and conducts an area analysis of clusters of nuclei. 
 
@@ -127,17 +152,28 @@ To start: call run_CCA() in run_nucleus_cluster_analysis.py.
     * name of experiment, used to generate a folder to store outputs.
 
 #### Output
-For each WSI that is processed, nuclei are clustered, and information about those clusters are gathered ("graph stats"). Additionally, information about where the nuclei are located and how much area they take up (after removing fatty objects that lay within cluster bounds) is stored.
+For each WSI that is processed, nuclei are clustered, and information about those clusters are gathered ("graph stats"). Additionally, information about where the nuclei are located and how much area they take up (after removing fatty objects that lay within cluster bounds) is stored. For more information about how to use output, see nucleus_cluster_analysis_data_analysis_example.ipynb
 * location: [`data-dir`]/[`output-folder-name`]/cluster_info/
     * [file_name]_[`output-folder-name`]_clusters.pkl (lst of lsts).
         * A list of components. Each component contains a list of each nucleus coordinate in that cluster.
     * [file_name]_[`output-folder-name`]_graph_stats.pkl (lst of lsts)
-        * [[nucleus1_information], [nucleus2_information], ...], where each element of the list represents a nucleus. The inner list contains [information](https://networkx.org/documentation/stable/reference/functions.html) about the nucleus in this order: [average_clustering_coeffs, clustering_coeffs, num_neigh, non_neigh_num, avg_dis_to_neighbor, avg_dis_to_nonneighbor, nom_comm_neighs, degree, is_in_cluster]
-* location: [`base_path`]/[`output-folder-name`]/CCA_dfs/
+        * Structured as a list of lists of nucleus [information](https://networkx.org/documentation/stable/reference/functions.html) :
+            * graph_stats[0] = average clustering coefficient (list of a float with the length of one)<br>
+            
+            The remaining elements are all lists, with each list having the length of the number of relevant nuclei detected. <br>
+
+            * graph_stats[1] = clustering coefficients (list)<br>
+            * graph_stats[2] = number of neighbors (list)<br>
+            * graph_stats[3] = number of non_neighbors (list)<br>
+            * graph_stats[4] = average distance (in pixels) to neighbors (list)<br> 
+            * graph_stats[5] = average distance (in pixels) to non-neighbor (list)<br>
+            * graph_stats[6] = number of common neighbors (list)<br>
+            * graph_stats[7] = degree (list)<br>
+            * graph_stats[8] = is nucleus in a cluster (list)
+* location: [`data-dir`]/[`output-folder-name`]/CCA_dfs/
     * [file_name]_[`output-folder-name`]_global_CCA.pkl (dataframe)
-        * Puts the nuclei information on a global (ie WSI) scale. 
-* location: [`data-dir`]/[file_name]_fat_and_nucs.pkl
-    * A column is added to the dataframe, recording how much area is attributed to clustered nuclei. Column name is = "area(px)_taken_up_by_nucleus_clusters_max_dis_`max-distance`(micrometers)".
+        * This dataframe puts nuclei information on a global (ie WSI) scale. Information about fatty area, nuclei, as well as area taken up by nuclei clusters is contained in this dataframe.  
+
 
 
 ### Additional Nucleus Analysis
@@ -205,13 +241,39 @@ This script analyzes the collagen proportionate area (CPA) in Masson's Trichrome
 * `DISK`(float, in µm)
     * Kernel used image preprocessing. Default: 8.3478513356562.
 
+
+Example:
+
+python .\src\run_CPA_analysis.py \
+--input-dir "F:\test\test_img\" \
+--output-dir "F:\test\test_cli"` \
+--output-folder-name "CPA" \
+--WSI-file-type ".mrxs" \
+--WSI-queue "test_img_HE.mrxs" \
+--patch-size "1500" \
+--patch-level "0" \
+--min-fat-vesicle-area "40" \
+--max-fat-vesicle-area "10000"\
+--min-extent "0.5" \
+--max-axis-ratio "2" \
+--disk "8.35" \
+
 #### Output
-For each WSI that is processed, a dataframe with the analysis data is saved. Additionally, binary masks of tissue and fat objects are saved, which can be useful for plotting and further analysis.
+For each WSI that is processed, a dataframe with the analysis data is saved. Additionally, binary masks of tissue and fat objects are saved, which can be useful for plotting and further analysis. To see examples how to use generated data, see CPA_data_analysis_example.ipynb.
 * [`output-dir`]/[`output-folder-name`]/dataframes
     * [file_name]_CPA.pkl (dataframe)
         * contains the following information on a patch-wise basis:
-            * WSI information: name of file processed, micrometers per pixels of WSI (`mpps`)
-            * information about processed patch: patch key (`original_patch_key`), global coordinates of patch in pixels (`global_x_coords(pxs)`, `global_y_coords(pxs)`), number of fibrotic pixels (`num_blue_pixels`), total number of tissue pixels detected with fatty pixels (`total_tissue_pixels(with_fat)`), total number of tissues without fatty pixels (`num_pixels_tissue_without_fat`), number of fatty pixels (`num_fat_pixels`).
+            * WSI information:
+                * `name` name of file processed
+                * `mpps` micrometers per pixels of WSI 
+            * Patch information: 
+                * `original_patch_key`: patch key
+                * `global_x_coords(pxs)`: x coordinate of the patch on a global (WSI) scale, in pixels
+                * `global_y_coords(pxs)`: y coordinate of hte patch on a global (WSI) scale, in pixels
+                * `num_blue_pixels`: number of fibrotic pixels
+                * `total_tissue_pixels(with_fat)`: total number of tissue pixels detected with fatty pixels
+                * `total number of tissues without fatty pixels`: total number of tissue pixels detected with fatty pixels
+                *  `num_fat_pixels`: number of fatty pixels.
 
 
 

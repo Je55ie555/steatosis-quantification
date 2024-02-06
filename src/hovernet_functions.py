@@ -101,6 +101,8 @@ def start_hovernet(stored_patches, save_loc, hovernet_command, master_loc, img_n
 
         ## data cleanup
         delete_all_tifs_from_directory(f"{save_loc}/{key}/original_patches/") #delete b/c easy to regenerate
+
+        
         if data_saver_mode:
             delete_mats(f"{save_loc}/{key}/generated_output/mat/")
             delete_pngs(f"{save_loc}/{key}/generated_output/overlay/")
