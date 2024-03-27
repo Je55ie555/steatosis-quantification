@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 import os
-
+from pathlib import Path
 
 def find_20x_fov(mpps):
     # find correct patchsize for a 20x field of view. Assumes FOV is a square.
@@ -37,68 +37,62 @@ def find_foci_per_patch(lst_of_centroids, xmin, xmax, ymin, ymax):
     return r
 
 
-def run_Infl_by_foci_for_all_imgs(path, processed, experiment_name, save_loc):
+def run_Infl_by_foci_for_all_imgs(path, CCA_experiment_name, FOV_experiment_name):
+    
+    for image in os.listdir(path):
+        
+        path_to_img_data = f"{path}/{image}/"
+        path_to_store_output_data = f"{path_to_img_data}/{FOV_experiment_name}/"
+        if not os.path.exists(
+            path_to_store_output_data
+        ):  # if experiment hasn't already been run
+            
+            Path(f"{path_to_store_output_data}").mkdir(parents=True, exist_ok=False)
 
-    for img in os.listdir(path):
-        print(img)
-        if img.endswith(".pkl"):
-            ## find file name
-            if img.endswith(f"{experiment_name}_global_CCA.pkl"):
-                name = img.replace(f"{experiment_name}_global_CCA.pkl", "")
+            global_CCA_path = f"{path_to_img_data}/nucleus_cluster_analysis/{CCA_experiment_name}/{image}_{CCA_experiment_name}_global_CCA.pkl"
+            clusters_path = f"{path_to_img_data}/nucleus_cluster_analysis/{CCA_experiment_name}/{image}_{CCA_experiment_name}_clusters.pkl"
+            clusters = pd.read_pickle(clusters_path)
+            global_CCA = pd.read_pickle(global_CCA_path)
 
-            if not (name in processed):
-                print(f"working on {name}")
-                processed.append(name)
-                global_CCA = pd.read_pickle(
-                    path + name + f"{experiment_name}_global_CCA.pkl"
-                )
-                clusters = pd.read_pickle(
-                    path.replace("CCA_dfs", "cluster_info")
-                    + name
-                    + f"{experiment_name}_clusters.pkl"
-                )
+            cluster_centroids = make_lst_of_centorids(clusters)
 
-                cluster_centroids = make_lst_of_centorids(clusters)
+            mpps = global_CCA["mpps"].iloc[0]  # always the same
+            subpatch_size = global_CCA["subpatch_size(px)"].iloc[0]  # always the same
+            start_x = int(min(global_CCA["global_x_coords(px)"]))
+            start_y = int(min(global_CCA["global_y_coords(px)"]))
+            end_x = int(max(global_CCA["global_x_coords(px)"])) + subpatch_size
+            end_y = int(max(global_CCA["global_y_coords(px)"])) + subpatch_size
 
-                mpps = global_CCA["mpps"].iloc[0]  # always the same
-                subpatch_size = global_CCA["subpatch_size(px)"].iloc[
-                    0
-                ]  # always the same
-                start_x = int(min(global_CCA["global_x_coords(px)"]))
-                start_y = int(min(global_CCA["global_y_coords(px)"]))
-                end_x = int(max(global_CCA["global_x_coords(px)"])) + subpatch_size
-                end_y = int(max(global_CCA["global_y_coords(px)"])) + subpatch_size
+            num_centroids_in_patch = []
+            coords_x_l = []
+            coords_y_l = []
 
-                num_centroids_in_patch = []
-                coords_x_l = []
-                coords_y_l = []
+            patchsize_20xfov = find_20x_fov(
+                mpps
+            )  ### replace with a different function for another fov. Remember to change naming of final pkl file (last line of function)
+            
+            for coords_y in range(start_y, end_y, patchsize_20xfov):
+                for coords_x in range(start_x, end_x, patchsize_20xfov):
 
-                patchsize_20xfov = find_20x_fov(
-                    mpps
-                )  ### replace with a different function for another fov. Remember to change naming of final pkl file (last line of function)
-                print("working with patchsize in px", patchsize_20xfov)
-                for coords_y in range(start_y, end_y, patchsize_20xfov):
-                    for coords_x in range(start_x, end_x, patchsize_20xfov):
+                    centroids_in_patch = find_foci_per_patch(
+                        lst_of_centroids=cluster_centroids,
+                        xmin=coords_x,
+                        xmax=coords_x + patchsize_20xfov,
+                        ymin=coords_y,
+                        ymax=coords_y + patchsize_20xfov,
+                    )
+                    num_centroids_in_patch.append(len(centroids_in_patch))
+                    coords_x_l.append(coords_x)
+                    coords_y_l.append(coords_y)
 
-                        centroids_in_patch = find_foci_per_patch(
-                            lst_of_centroids=cluster_centroids,
-                            xmin=coords_x,
-                            xmax=coords_x + patchsize_20xfov,
-                            ymin=coords_y,
-                            ymax=coords_y + patchsize_20xfov,
-                        )
-                        num_centroids_in_patch.append(len(centroids_in_patch))
-                        coords_x_l.append(coords_x)
-                        coords_y_l.append(coords_y)
-
-                df_of_num_centroids_per_fov = pd.DataFrame(
-                    data={
-                        "coords_x(px)": coords_x,
-                        "coords_y(px)": coords_y,
-                        "num_centroids_in_patch": num_centroids_in_patch,
-                    }
-                )
-                print(f"saving {name}")
-                df_of_num_centroids_per_fov.to_pickle(
-                    f"{save_loc}/{experiment_name}/num_foki_per_20fov/{name}_foki_per_20xfov.pkl"
-                )  ## change name if not using 20x fov
+            df_of_num_centroids_per_fov = pd.DataFrame(
+                data={
+                    "coords_x(px)": coords_x,
+                    "coords_y(px)": coords_y,
+                    "num_centroids_in_patch": num_centroids_in_patch,
+                }
+            )
+            
+            df_of_num_centroids_per_fov.to_pickle(
+                f"{path_to_store_output_data}{image}_foki_per_20xfov.pkl"
+            )  ## change name if not using 20x fov

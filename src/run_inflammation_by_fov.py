@@ -10,30 +10,27 @@ parser = argparse.ArgumentParser(
 parser.add_argument(
     "--data-dir",
     required=True,
-    help="path to fat and nucleus detection output ([file_name]_fat_and_nucs.pkl). The output of nucleus cluster analysis will also be stored under this location",
+    help="path to fat and nucleus detection output",
     type=str,
 )
 parser.add_argument(
-    "--output-dir", required=True, help="path to output directory", type=str
+    "--CCA-folder-name", required=True, help="path to CCA_dfs", type=str
 )
 parser.add_argument(
-    "--output-folder-name",
+    "--FOV_output",
     required=True,
-    help="name for the output folder. Date & time are automatically added to prevent overwriting",
+    help="name for the output folder.",
     type=str,
 )
 args = parser.parse_args()
 
 path = args.data_dir
-experiment_name = args.output_folder_name
-save_loc = args.output_dir
-processed = os.listdir(
-    f"{save_loc}/{experiment_name}/num_foki_per_20fov/"
-)  # prevent images from being rerun :D. Remember to change hardcoded part if using another fov.
-processed = [
-    i.replace("_foki_per_20xfov.pkl", "") for i in processed
-]  # creates a list of the names of files that have already been processed.
+CCA_experiment_name = args.CCA_folder_name
+FOV_experiment_name = args.FOV_output
+
 
 run_Infl_by_foci_for_all_imgs(
-    path=path, processed=processed, experiment_name=experiment_name, save_loc=save_loc
+    path=path,
+    CCA_experiment_name=CCA_experiment_name,
+    FOV_experiment_name=FOV_experiment_name,
 )
