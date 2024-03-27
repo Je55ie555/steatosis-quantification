@@ -1,0 +1,22 @@
+https://github.com/python-pillow/Pillow/blob/main/LICENSE 
+
+
+https://github.com/dwaithe/MaximaFinder/blob/master/LICENSE
+
+https://github.com/cgohlke/czifile?tab=License-1-ov-file
+
+https://github.com/vqdang/hover_net/blob/master/LICENSE
+
+https://networkx.org/documentation/stable/
+
+
+https://github.com/docopt/docopt?tab=MIT-1-ov-file
+
+
+https://github.com/pytorch/pytorch?tab=License-1-ov-file#readme
+
+https://github.com/tqdm/tqdm?tab=License-1-ov-file#readme
+ 
+https://github.com/aleju/imgaug-doc/blob/master/LICENSE
+
+https://pypi.org/project/termcolor/ #MIT License
