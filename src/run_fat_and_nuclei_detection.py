@@ -26,8 +26,9 @@ parser.add_argument('--WSI-queue', required=False, help="A list of comma separat
 parser.add_argument( '--run-hovernet', required=False, help="must be 'True' to run HoVer-Net", action="store_true") 
 parser.add_argument( '--hovernet-dir', required=False, help="path to HoVer-Net code")
 parser.add_argument( '--hovernet-weights-file', required=False, help="path to weights (.tar file)", type=str)
-parser.add_argument( '--hovernet-gpu', required=False, help="which gpu number to use run HoVer-Net", type=int)
-parser.add_argument( '--hovernet-num-nuc-types', required=False, help="how many nuclei types are to be detected. Depends on weights being used.", type=int)
+parser.add_argument( '--hovernet-gpu', required=False, help="which gpu number to use run HoVer-Net", type=str)
+parser.add_argument( '--hovernet-num-nuc-types', required=False, help="how many nuclei types are to be detected. Depends on weights being used.", type=str)
+parser.add_argument( '--hovernet-batch-size', required=False, help="what batch size to use", type=str)
 parser.add_argument( '--hovernet-model-mode', required=False, help="can either be 'fast' or 'original'", type=str)
 parser.add_argument( '--hovernet-run-function', required=False, help="see HoVer-Net documentation. Default: './run_infer.py'", type=str, default='./run_infer.py') #call
 parser.add_argument( '--data-saver-mode', required=False, help="handle HoVer-Net temporary data", action = "store_true")
@@ -48,7 +49,7 @@ args = parser.parse_args()
 #check inputs and create output dir with correct naming
 run_time = datetime.now().strftime("%Y%m%d-%H%M%S")
 assert path.exists(args.input_dir) 
-output_path = args.output_dir + args.output_folder_name + run_time # run_path
+output_path = args.output_dir +"/"+ args.output_folder_name +"_"+ run_time  + "/" 
 Path(f"{output_path}").mkdir(parents=True, exist_ok=False)#create the output directory
 
 #check if hovernet parameters are complete
@@ -59,7 +60,8 @@ if args.run_hovernet:
                      args.hovernet_weights_file,
                      args.hovernet_model_mode,
                      args.hovernet_run_function,
-                     args.data_saver_mode
+                     args.data_saver_mode,
+                     args.hovernet_batch_size
     ]
 
     for arg in hovernet_args:
@@ -71,13 +73,14 @@ if args.run_hovernet:
             print("     --num-nuc-types")
             print("     --hovernet-model-mode")
             print("     --hovernet-run-function")
+            print("    --hovernet-batch_size")
             assert 1==2
     else:
-        hovernet_command = [args.hovernet_gpu, args.hovernet_num_nuc_types, args.hovernet_model_mode, args.hovernet_weights_file, args.hovernet_run_function]
+        hovernet_command = [args.hovernet_gpu, args.hovernet_num_nuc_types, args.hovernet_model_mode, args.hovernet_weights_file, args.hovernet_run_function, args.hovernet_batch_size]
 if not(args.run_hovernet):
     hovernet_command = []
 
-    
+
 
 #calculate remaining parameters
 FILL_FG_SIZE = args.min_fat_vesicle_area - 0.2 #in micrometers
@@ -94,7 +97,7 @@ else:
 
 run_workflow(
     file_location = args.input_dir,
-    run_path = args.output_dir,
+    run_path = output_path,
     PATCH_SIZE = args.patch_size,
     patch_level = args.patch_level,
     MIN_FAT_AREA = args.min_fat_vesicle_area,

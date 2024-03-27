@@ -626,10 +626,21 @@ def run_workflow(
             print("---------- processing patch number:")
             for coords_y in range(start_y, finish_y, patch_size):
                 for coords_x in range(start_x, finish_x, patch_size):
-                    print("             |_ ", key)
-                    if (key >= 0) & (key <= 5):#keep in case a particular patch key is of interest :)
+                    #print("             |_ ", key)
+                    if (key >= 0):#keep in case a particular patch key is of interest :)
+
+                        ### if you want to process only one patch at a given location....
+                        # coords_x = start_x + int(6474/0.139)
+                        # coords_y = start_y + int(3170/0.139)
+                        # print("FIXED X AND Y COORDS!")
+                        # patch_to_save = Image.fromarray(patch)
+                        # patch_to_save.save(f"{fat_loc}{key}_{coords_x}_{coords_y}_sanity_test.tif")
+                        # print("done saving imgae")
+                        # print(f"{fat_loc}{key}_{coords_x}_{coords_y}_sanity_test.tif")
+                        
 
                         patch = open_patch(img_type, wsi, wsi_img_array, coords_x, coords_y, patch_size, patch_level) 
+
                         scanned_patch = return_scanned_parts(img=patch, img_type=img_type)
                         closed_patch, preprocessed_patch, gray_patch = (
                             preprocess(
@@ -639,8 +650,7 @@ def run_workflow(
                                 filled_fg_hole_size=filled_fg_hole_size,
                                 kernel=kernel
                             ))
-
-
+                      
                         
                         patch_with_fat_objects, forground_area = object_analysis( 
                             closed_patch=closed_patch,

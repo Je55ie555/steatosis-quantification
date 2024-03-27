@@ -75,6 +75,7 @@ def start_hovernet(stored_patches, save_loc, hovernet_command, master_loc, img_n
     b = hovernet_command[1] # number of types of nuclei to predict 
     c = hovernet_command[2] # model mode
     d  = hovernet_command[3] # model path
+    batch_size = hovernet_command[5] #128//8 #hovernet_default is 128
     
     for i in stored_patches:
         pic = i[0]
@@ -87,23 +88,26 @@ def start_hovernet(stored_patches, save_loc, hovernet_command, master_loc, img_n
         ## preparing command to run hovernet
         if int(b) > 0:
             type_info_path={output_dir}
-            command = ["python3", "run_infer.py", f"--gpu={a}",f"--nr_types={int(b)}", f"--type_info_path=type_info.json", f"--model_mode={c}",f"--model_path={d}", 'tile', f"--input_dir={input_dir}", f"--output_dir={output_dir}"]    
+            ## CAREFUL! WHEN running on windows, use python instead of python3
+            command = ["python", "run_infer.py", f"--gpu={a}",f"--nr_types={int(b)}", f"--batch_size={batch_size}",f"--type_info_path=type_info.json", f"--model_mode={c}",f"--model_path={d}", 'tile', f"--input_dir={input_dir}", f"--output_dir={output_dir}"]    
         else:
-            command = ["python3", "run_infer.py",f"--gpu={a}", f"--model_path={d}",f"--model_mode={c}", 'tile', f"--input_dir={input_dir}", f"--output_dir={output_dir}"]
+            command = ["python", "run_infer.py",f"--gpu={a}", f"--model_path={d}",f"--model_mode={c}",  f"--batch_size={batch_size}",'tile', f"--input_dir={input_dir}", f"--output_dir={output_dir}"]
         
-
+        #print(command)
         ## start the process
         os.chdir(master_loc) # this works and gets you to the right directory
         proc = subprocess.Popen(command, env=dict(os.environ, KMP_DUPLICATE_LIB_OK = "TRUE"), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         proc.wait(timeout=None) #wait for patches to finish processing
-        #print(proc.stderr.readlines()) #debug
-        print("                 |_entering hovernet process // pid:", proc.pid)
 
-        ## data cleanup
-        delete_all_tifs_from_directory(f"{save_loc}/{key}/original_patches/") #delete b/c easy to regenerate
+        ##uncomment to debug hovernet!
+        #print(proc.stderr.readlines()) 
+        #print("                 |_entering hovernet process // pid:", proc.pid)
 
         
+        
         if data_saver_mode:
+            ## data cleanup
+            delete_all_tifs_from_directory(f"{save_loc}/{key}/original_patches/") #delete b/c easy to regenerate
             delete_mats(f"{save_loc}/{key}/generated_output/mat/")
             delete_pngs(f"{save_loc}/{key}/generated_output/overlay/")
         
@@ -204,7 +208,7 @@ def consolidate_hovernet_data(path):
                 type_inst = inst_info["type"] 
                 type_prob = inst_info["type_prob"]
                 
-                #print("check if global_centeroid calcualation is correct!!! seems weird to me")
+                
 
                 global_centroid = put_coords_in_global_context(lst_of_coords=inst_centroid, global_x=coords_x, global_y=coords_y)
                 global_contour = put_lst_lst_in_global_context(lst_of_lst_coords=inst_contour, global_x=coords_x, global_y=coords_y)
@@ -228,7 +232,7 @@ def consolidate_hovernet_data(path):
 def load_preprocessed_img(loc, wanted_key):
     """loads an image by patch key"""
     for i in os.listdir(loc):
-        patch_key = i.split("_")[0] #check this :D
+        patch_key = i.split("_")[0] 
         coords_x = i.split("_")[1]
         coords_y = i.split("_")[2].replace(".tif","")
         if patch_key == str(wanted_key):
@@ -261,10 +265,8 @@ def globalize_hovernet_data(raw_df, binary_loc):
                 coords = row["centroid_global(px)"]
                 local_x = coords[0] - coords_x
                 local_y = coords[1] - coords_y
-                #assert (coords[0] >= coords_x) & (coords[0] <= coords_x + 10000)
-                #assert (coords[1] >= coords_y) & (coords[0] <= coords_y + 10000)
                 count += 1
-                if preprocessed_img[int(local_y), int(local_x)] == 0: #careful, loads [y:x] ## THEN is located in a tissue area
+                if preprocessed_img[int(local_y), int(local_x)] == 0: ### if nucleus is located in a tissue area
                     to_keep.append(True)
                 else:
                     to_keep.append(False)

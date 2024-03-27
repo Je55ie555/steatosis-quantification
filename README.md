@@ -24,6 +24,11 @@ This code processes a WSI in patches in order to detect fatty vesicles. Optional
 * Czifile v 2019.7.2
 * json5 v 0.9.6
 * Matplotlib v 3.3.4
+* Pytorch v 2.2.1
+* docopt v 0.6.2
+* tqdm v 4.66.2
+* imgaug v 0.4.0
+* termcolor v 2.4.0
 
 #### Usage:
 To start: call run_workflow() in run_fat_and_nuclei_detection.py.
@@ -72,6 +77,8 @@ To start: call run_workflow() in run_fat_and_nuclei_detection.py.
         * can be “original” or “fast”.
     * `hovernet-run-function` (str) 
         * Default: “./run_infer.py”
+    * `hovernet-batch-size` (str of an int)
+        * what batch-size hovernet should use. Default is 128
     * `data_saver_mode` (bool) 
         * if data_saver_mode = True, unused HoVer-Net output (overlays and mat files) are automatically deleted.
         * Default = False
@@ -98,12 +105,13 @@ python .\src\run_fat_and_nuclei_detection.py\
 --hovernet-num-nuc-types "0"\
 --hovernet-model-mode "original"\
 --hovernet-run-function "./run_infer.py"\
+--hovernet-batch-size "128"
 --data-saver-mode
 
 
 #### Output:
 Each file is processed, and output for each file is stored in various dataframes. These dataframes contain information about tissue area, fat area, fat objects, mpp, and, if wished, nuclei information. For more information about the contents of these dataframes, see fat_and_nucleus_data_analysis_example.ipynb. 
-* location: [`output-dir`]/[`output-folder-name`]/dataframes/
+* location: [`output-dir`]/[`output-folder-name`]/[`file_name`]/dataframes/
     * [file_name]_data.csv (dataframe)
         * Contains data about each potential fat object that was detected, as well as information about the processed patch.
     * [file_name]_subpatch_df.pkl (dataframe)
@@ -115,11 +123,17 @@ Each file is processed, and output for each file is stored in various dataframes
             * Contains only nuclei that lie in regions with relevant detected tissue.
         * [file_name]_fat_and_nucs.pkl (dataframe)
             * Combined information about fat, tissue area and detected nuclei. This dataframe is required in order to run nucleus cluster analysis. To generate _fat_and_nucs_df.pkl, the WSI must also be processed as subpatches (that means `SUBPATCH_SIZES` must be a list with a length of at least one).
-* location: [`output-dir`]/[`output-folder-name`]/saved_patches/
-    * In this folder, a binary mask of tissue, as well as detected fatty objects is saved for each patch with relevant tissue area. These patches can be useful for further analysis. 
-* location: [`output-dir`]/[`output-folder-name`]/temporary_data/
-    * Contains information about the nucleus analysis.
-
+* location: [`output-dir`]/[`output-folder-name`]/[`file_name`]/saved_patches
+    * /fat_patches/
+        * contains a binary mask of objects determined to be fatty vesicles.
+    * /binary_patches/
+        * contains a binary mask of detected tissue.
+* location: [`output-dir`]/[`output-folder-name`]/[`file_name`]/temporary_data
+    * /[`int_of_batch_number`]/
+        * /generated_output/
+            * location of the generated nucleus information.
+        * /original_patches/
+            * contains the .tif files of the processed patch. To save memory, these images are automatically deleted if data-saver-mode is activated.
 
 
 ### Nucleus Cluster Analysis
@@ -323,6 +337,44 @@ We hope you find our work helpful! If you use this code, please cite the followi
   year      = 2007<br>
 }<br>
 
+
+@misc{paszke2019pytorch,<br>
+      title={PyTorch: An Imperative Style, High-Performance Deep Learning Library}, <br>
+      author={Adam Paszke and Sam Gross and Francisco Massa and Adam Lerer and James Bradbury and Gregory Chanan and Trevor Killeen and Zeming Lin and Natalia Gimelshein and Luca Antiga and Alban Desmaison and Andreas Köpf and Edward Yang and Zach DeVito and Martin Raison and Alykhan Tejani and Sasank Chilamkurthy and Benoit Steiner and Lu Fang and Junjie Bai and Soumith Chintala},<br>
+      year={2019},<br>
+      eprint={1912.01703},<br>
+      archivePrefix={arXiv},<br>
+      primaryClass={cs.LG}<br>
+}<br>
+
+@article{da Costa-Luis2019,<br> 
+doi = {10.21105/joss.01277},<br> 
+url = {https://doi.org/10.21105/joss.01277}, <br>
+year = {2019},<br> 
+publisher = {The Open Journal},<br> 
+volume = {4}, number = {37},<br>
+pages = {1277},<br>
+author = {Casper O. da Costa-Luis},<br>
+title = {`tqdm`: A Fast, Extensible Progress Meter for Python and CLI},<br>
+journal = {Journal of Open Source Software}<br>
+} 
+
+
+@misc{imgaug,<br>
+  author = {Alexander Jung},<br>
+  title = {imgaug},<br>
+  howpublished = "{https://imgaug.readthedocs.io/en/latest/}",<br>
+  year = {2020}, <br>
+}
+
+
+@misc{termcolor 2.4.0,<br>
+  author = {Konstantin Lepa},<br>
+  title = {termcolor 2.4.0},<br>
+  howpublished = "{https://pypi.org/project/termcolor/}",<br>
+  year = {2023}, <br>
+}
+
 @Article{         harris2020array,<br>
  title         = {Array programming with {NumPy}},<br>
  author        = {Charles R. Harris and K. Jarrod Millman and St{\'{e}}fan J.<br>
@@ -480,6 +532,8 @@ We hope you find our work helpful! If you use this code, please cite the followi
 MaximaFiner, dwaithe, May 26, 2021. https://github.com/dwaithe/MaximaFinder?tab=readme-ov-file. https://github.com/dwaithe/MaximaFinder/blob/master/LICENSE<br>
 
 czifile, Christoph Gohlke, Laboratory for Fluorescence Dynamics. University of California, Irvine, July 3, 2019. https://github.com/cgohlke/czifile .https://github.com/cgohlke/czifile/blob/master/LICENSE<br>
+
+docopt, contributors, https://github.com/docopt/docopt. https://github.com/docopt/docopt?tab=MIT-1-ov-file#readme<br>
 
 
 ##### stackoverflow answers:<br>

@@ -5,9 +5,10 @@ from os import path
 from pathlib import Path
 from CCA_nuclei import *
 
-parser = argparse.ArgumentParser(prog='Fat and Nuclei Detection',
-    description='This code takes information about nuclei location to analyze nucleu distribution.'
-    epilog='See ReadMe for more information')
+parser = argparse.ArgumentParser(
+                    prog='Nucleus Cluster Analysis',
+                    description='This code takes information about nuclei location, and analyzes the nuclei distributions.',
+                    epilog='See ReadMe for more information')
 
 parser.add_argument( '--data-dir', required=True, help="path to fat and nucleus detection output ([file_name]_fat_and_nucs.pkl). The output of nucleus cluster analysis will also be stored under this location", type=str)
 parser.add_argument( '--fat-masks-dir', required=True, help="path to saved fat_patches masks from fat and nucleus detection script.", type=str)
