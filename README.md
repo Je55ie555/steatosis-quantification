@@ -6,7 +6,7 @@ This project was designed to analyze whole slide images (WSI) for liver biopsies
 * Nucleus count and distribution
 * Collagen proportionate area
 
- The analysis uses tissue sections stained in H&E and Masson's Trichrome. Supported datatypes include mrxs and czi files. For more information, please see the corresponding [publication](https://link.springer.com/10.1007/s00292-024-01298-6}). 
+ The analysis uses tissue sections stained in H&E and Masson's Trichrome. Supported datatypes include mrxs and czi files. For more information, please see the corresponding [publication](https://link.springer.com/10.1007/s00292-024-01298-6). 
 
 
 ### Fat and Nuclei Detection
