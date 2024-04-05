@@ -322,6 +322,10 @@ We hope you find our work helpful! If you use our work, please cite the followin
 ```
 
 
+### License
+This project is licensed under the MIT License - see the LICENSE.md for details.
+
+
 
 ### Thank you for the support!
 
