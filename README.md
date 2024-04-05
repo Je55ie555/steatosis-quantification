@@ -32,7 +32,7 @@ This code processes a WSI in patches in order to detect fatty vesicles. Optional
 * HoVer-Net
 
 #### Usage:
-To start: call run_workflow() in run_fat_and_nuclei_detection.py.
+To start: execute run_fat_and_nuclei_detection.py.
 #####  Parameters:
 * `output-folder-name` (str)
     * name of folder to store outputs under.
@@ -154,7 +154,7 @@ This code takes information about nuclei location (information gained by enablin
 
 
 #### Usage:
-To start: = run_nucleus_cluster_analysis.py. Fat and Nucleus Detection Script must be executed first!
+To start: execute run_nucleus_cluster_analysis.py. Fat and Nucleus Detection Script must be executed first!
 
 #####  Parameters:
 * `data-dir` (str) 
@@ -201,7 +201,7 @@ This script allows an analysis of the number of nuclei clusters in a given (squa
 * see Nucleus Cluster Analysis Script environment
 
 #### Usage: 
-* To start: run_inflammation_by_fov.py
+* To start: execute run_inflammation_by_fov.py
     * By adjusting function “find_20x_fov” you can change the size of FOV. In the script, a 20xFOV is ~1120 x 1120 µm<sup>2</sup>.
 
     * ##### Parameters
@@ -233,7 +233,7 @@ This script analyzes the collagen proportionate area (CPA) in Masson's Trichrome
 * scikit-learn v 0.24.2
 
 #### Usage:
-* To start: call detect_CPA() in run_CPA_anlaysis.py
+* To start: execute run_CPA_anlaysis.py
 
 #####  Parameters:
 * `output-folder-name` (str)
