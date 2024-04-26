@@ -8,118 +8,120 @@ This project was designed to analyze whole slide images (WSI) for liver biopsies
 
  The analysis uses tissue sections stained in H&E and Masson's Trichrome. Supported datatypes include mrxs and czi files. For more information, please see the corresponding [publication](https://link.springer.com/10.1007/s00292-024-01298-6). 
 
+ Please note that the following commands are formatted for windows. Minor adjustments (e.g path names) may be required for linux. 
+
 
 ### Fat and Nuclei Detection
 This code processes a WSI in patches in order to detect fatty vesicles. Optionally, if analyzing a H&E WSI, nuclei can be detected using [HoVer-Net](https://github.com/vqdang/hover_net). Nucleus detection is optional, and can only be performed on H&E stained tissue sections. Fat detection can be performed on both Masson's Trichrome and H&E stained WSIs. 
 
 #### Environment
-* Numpy v 1.20.2
-* openslide-python v 3.3
-* scikit-image v 0.18.1
-* pandas v 1.2.4
-* findmaxima2d v 0.0.25
-* scipy v 1.6.2
-* opencv v 4.5.2
-* PIL v 8.2.0
-* Czifile v 2019.7.2
-* json5 v 0.9.6
-* Matplotlib v 3.3.4
-* Pytorch v 2.2.1
-* docopt v 0.6.2
-* tqdm v 4.66.2
-* imgaug v 0.4.0
-* termcolor v 2.4.0
+* Numpy v1.20.2
+* openslide-python v3.3
+* scikit-image v0.18.1
+* pandas v1.2.4
+* findmaxima2d v0.0.25
+* scipy v1.6.2
+* opencvv4.5.2
+* PIL v8.2.0
+* Czifile v2019.7.2
+* json5 v0.9.6
+* Matplotlib v3.3.4
+* Pytorch v2.2.1
+* docopt v0.6.2
+* tqdm v4.66.2
+* imgaug v0.4.0
+* termcolor v2.4.0
 * HoVer-Net
 
 #### Usage:
-To start: execute run_fat_and_nuclei_detection.py.
+To start: execute `python .\src\run_fat_and_nuclei_detection.py`.
 #####  Parameters:
-* `output-folder-name` (str)
+* `--output-folder-name` (str)
     * name of folder to store outputs under.
-* `output-dir` (str) 
+* `--output-dir` (str) 
     * where you want the outputs to be stored.
-* `input-dir` (str) 
+* `--input-dir` (str) 
     * where the files you want to process are located.
-* `hovernet-dir` (str)
+* `--hovernet-dir` (str)
     * path to HoVer-Net code.
-* `hovernet-weights-file` (str)
+* `--hovernet-weights-file` (str)
     * path to HoVer-Net weights.
-* `WSI-file-type` (str) 
+* `--WSI-file-type` (str) 
     * can be “.mrxs” or “.czi”.
-* `WSI-queue` (list of str) 
+* `--WSI-queue` (list of str) 
     * A list of comma separated file names as a string, ie 'file_a,file_b' [no spaces!] of the WSIs to be processed in the input directory. When not specified, all files with the given file_type in the directory are processed. Default = "".
-* `PATCH_SIZE` (int) 
+* `--PATCH_SIZE` (int) 
     * patch size in micrometers. Patches are always processed in square. Default is 1500x1500 µm<sup>2</sup>.
-* `PATCH_LEVEL` (int) 
+* `--PATCH_LEVEL` (int) 
     * level at which patches are processed. Default is 0.
-* `MIN_AREA` (int) 
+* `--MIN_AREA` (int) 
     * in µm<sup>2</sup>. Smallest size of a macrovesicular fat vesicle. Default is 40 µm<sup>2</sup>.
-* `MAX_AREA` (int)
+* `--MAX_AREA` (int)
     * in µm<sup>2</sup>. Maximum area of fat vesicle. Default is 10000 µm<sup>2</sup>. Keep in mind that fatty objects can be connected into one big object.
-* `MIN_EXTENT` (int)
+* `--MIN_EXTENT` (int)
     * minimum extent of a fat vesicle. Default is 0.5.
-* `FILL_FG_SIZE` (int)
+* `--FILL_FG_SIZE` (int)
     * fills in objects in the foreground. Default: is calculated from MIN_AREA.
-* `FILL_BG_SIZE` (int) 
+* `--FILL_BG_SIZE` (int) 
     * fills in objects in the background. Default: is calculated from MAX_AREA.
-* `MAX_AXIS_RATIO` (int) 
+* `--MAX_AXIS_RATIO` (int) 
     * maximum axis ratio of a fat vesivle. Default: 2.
-* `SUBPATCH_SIZES_FACTOR` (int)
+* `--SUBPATCH_SIZES_FACTOR` (int)
     * int representing how many subpatches a patch will be divided into. Default=20.
-* `DISK`(float, in µm)
+* `--DISK`(float, in µm)
     * Kernel used image preprocessing. Default: 8.3478513356562
 * Nucleus Detection Parameters (see [HoVer-Net Repo](https://github.com/vqdang/hover_net) for more information).
-    * `run-hovernet` (bool)
-    * `hovernet_gpu` (str of an int)
+    * `--run-hovernet` (bool)
+    * `--hovernet_gpu` (str of an int)
         * which gpus should be used.
-    * `hovernet_num_nuc_types` (str of an int)
+    * `--hovernet_num_nuc_types` (str of an int)
         * how many nuclei types are to be detected. Depends on weights being used.
-    * `hovernet_model_mode` (str)
+    * `--hovernet_model_mode` (str)
         * can be “original” or “fast”.
-    * `hovernet-run-function` (str) 
+    * `--hovernet-run-function` (str) 
         * Default: “./run_infer.py”.
-    * `hovernet-batch-size` (str of an int)
+    * `--hovernet-batch-size` (str of an int)
         * what batch size should be used.
-    * `data_saver_mode` (bool) 
+    * `--data_saver_mode` (bool) 
         * if data_saver_mode = True, temporary outputs are automatically deleted. Default = False.
 
 #### Example:
-    python .\src\run_fat_and_nuclei_detection.py\
-    --input-dir "F:\test\test_img\"\
-    --output-dir "F:\test\test_cli"\
-    --output-folder-name "fat_and_nuclei_detection"\
-    --hovernet-dir "F:\test\hover_net-master"\
-    --hovernet-weights-file "F:\test\hover_net-master\hovernet_original_kumar_notype_tf2pytorch.tar"`\
-    --WSI-file-type ".mrxs"\
-    --WSI-queue "test_img_HE.mrxs"\
-    --patch-size "1500"\
-    --patch-level "0"\
-    --min-fat-vesicle-area "40"\
-    --max-fat-vesicle-area "10000"\
-    --min-extent "0.5"\
-    --max-axis-ratio "2"\
-    --subpatch-size-factor "20"\
-    --disk "8.35"\
-    --run-hovernet\
-    --hovernet-gpu "0"\
-    --hovernet-num-nuc-types "0"\
-    --hovernet-model-mode "original"\
-    --hovernet-run-function "./run_infer.py"\
-    --hovernet-batch-size "128"\
-    --data-saver-mode
+    python .\src\run_fat_and_nuclei_detection.py \
+        --input-dir "F:\test\test_img\"\
+        --output-dir "F:\test\test_cli"\
+        --output-folder-name "fat_and_nuclei_detection"\
+        --hovernet-dir "F:\test\hover_net-master"\
+        --hovernet-weights-file "F:\test\hover_net-master\hovernet_original_kumar_notype_tf2pytorch.tar"\
+        --WSI-file-type ".mrxs"\
+        --WSI-queue "test_img_HE.mrxs"\
+        --patch-size "1500"\
+        --patch-level "0"\
+        --min-fat-vesicle-area "40"\
+        --max-fat-vesicle-area "10000"\
+        --min-extent "0.5"\
+        --max-axis-ratio "2"\
+        --subpatch-size-factor "20"\
+        --disk "8.35"\
+        --run-hovernet\
+        --hovernet-gpu "0"\
+        --hovernet-num-nuc-types "0"\
+        --hovernet-model-mode "original"\
+        --hovernet-run-function "./run_infer.py"\
+        --hovernet-batch-size "128"\
+        --data-saver-mode
 
 
 #### Output:
 Each file is processed, and output for each file is stored in various dataframes. These dataframes contain information about tissue area, fat area, fat objects, mpp, and, if wished, nuclei information. Additionally, binary masks of detected tissue and fatty vesicles are stored on a patchwise basis. For more information about the contents of these dataframes, see fat_and_nucleus_data_analysis_example.ipynb. 
-* location: [`output-dir`]/[`output-folder-name`]/[`file_name`]/dataframes/
-    * [file_name]_data.csv (dataframe)
+* location: `[output-dir]/[output-folder-name]/[file_name]/dataframes/`
+    * `[file_name]_data.csv` (dataframe)
         * contains data about each potential fat object that was detected, as well as information about the processed patch.
     * [file_name]_subpatch_df.pkl (dataframe)
         * splits the processed patch into smaller patches, to allow for more granular data analysis.
     * If nucleus information is gathered:
         * [file_name]_raw_global.pkl (dataframe)
             * contains all detected nuclei, even those in unscanned areas.
-        *[file_name] _relevant_nuclei.pkl (dataframe)
+        * [file_name] _relevant_nuclei.pkl (dataframe)
             * contains only nuclei that lie in regions with relevant detected tissue.
         * [file_name]_fat_and_nucs.pkl (dataframe)
             * contains combined information about fat, tissue area and detected nuclei. This dataframe is required in order to run nucleus cluster analysis. To generate _fat_and_nucs_df.pkl, the WSI must also be processed as subpatches (that means `SUBPATCH_SIZES` must be a list with a length of at least one).
@@ -299,7 +301,7 @@ For each WSI that is processed, a dataframe with the analysis data is saved. Add
                 *  `num_fat_pixels`: number of fatty pixels.
 
 
-
+# Citation
 We hope you find our work helpful! If you use our work, please cite the following paper:
 
 ```
@@ -321,13 +323,11 @@ We hope you find our work helpful! If you use our work, please cite the followin
 }
 ```
 
-
-### License
-This project is licensed under the MIT License - see the LICENSE.md file for details.
-
+# License
+This work is licensed under the MIT License. Please see [./LICENSE.txt] for more information.
 
 
-### Thank you for the support!
+# Thank you for the support!
 
 ```
 @software{reback2020pandas,
