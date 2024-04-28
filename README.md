@@ -6,9 +6,9 @@ This project was designed to analyze whole slide images (WSI) for liver biopsies
 * Nucleus count and distribution
 * Collagen proportionate area
 
- The analysis uses tissue sections stained in H&E and Masson's Trichrome. Supported datatypes include mrxs and czi files. For more information, please see the corresponding [publication](https://link.springer.com/10.1007/s00292-024-01298-6). 
+> The analysis uses tissue sections stained in H&E and Masson's Trichrome. Supported datatypes include mrxs and czi files. For more information, please see the corresponding [publication](https://link.springer.com/10.1007/s00292-024-01298-6). 
 
- Please note that the following commands are formatted for windows. Minor adjustments (e.g path names) may be required for linux. 
+> Please note that the following commands are formatted for windows. Minor adjustments (e.g path names) may be required for linux. 
 
 
 ### Fat and Nuclei Detection
@@ -21,7 +21,7 @@ This code processes a WSI in patches in order to detect fatty vesicles. Optional
 * pandas v1.2.4
 * findmaxima2d v0.0.25
 * scipy v1.6.2
-* opencvv4.5.2
+* opencv v4.5.2
 * PIL v8.2.0
 * Czifile v2019.7.2
 * json5 v0.9.6
@@ -50,65 +50,65 @@ To start: execute `python .\src\run_fat_and_nuclei_detection.py`.
     * can be “.mrxs” or “.czi”.
 * `--WSI-queue` (list of str) 
     * A list of comma separated file names as a string, ie 'file_a,file_b' [no spaces!] of the WSIs to be processed in the input directory. When not specified, all files with the given file_type in the directory are processed. Default = "".
-* `--PATCH_SIZE` (int) 
+* `--patch-size` (int) 
     * patch size in micrometers. Patches are always processed in square. Default is 1500x1500 µm<sup>2</sup>.
-* `--PATCH_LEVEL` (int) 
+* `--patch-level` (int) 
     * level at which patches are processed. Default is 0.
-* `--MIN_AREA` (int) 
+* `--min-area` (int) 
     * in µm<sup>2</sup>. Smallest size of a macrovesicular fat vesicle. Default is 40 µm<sup>2</sup>.
-* `--MAX_AREA` (int)
+* `--max-area` (int)
     * in µm<sup>2</sup>. Maximum area of fat vesicle. Default is 10000 µm<sup>2</sup>. Keep in mind that fatty objects can be connected into one big object.
-* `--MIN_EXTENT` (int)
+* `--min-extent` (int)
     * minimum extent of a fat vesicle. Default is 0.5.
-* `--FILL_FG_SIZE` (int)
+* `--fill-fg-size` (int)
     * fills in objects in the foreground. Default: is calculated from MIN_AREA.
-* `--FILL_BG_SIZE` (int) 
+* `--fill-bg-size` (int) 
     * fills in objects in the background. Default: is calculated from MAX_AREA.
-* `--MAX_AXIS_RATIO` (int) 
+* `--max-axis-ratio` (int) 
     * maximum axis ratio of a fat vesivle. Default: 2.
-* `--SUBPATCH_SIZES_FACTOR` (int)
+* `--subpatch-size-factor` (int)
     * int representing how many subpatches a patch will be divided into. Default=20.
-* `--DISK`(float, in µm)
+* `--disk`(float, in µm)
     * Kernel used image preprocessing. Default: 8.3478513356562
 * Nucleus Detection Parameters (see [HoVer-Net Repo](https://github.com/vqdang/hover_net) for more information).
     * `--run-hovernet` (bool)
-    * `--hovernet_gpu` (str of an int)
+    * `--hovernet-gpu` (str of an int)
         * which gpus should be used.
-    * `--hovernet_num_nuc_types` (str of an int)
+    * `--hovernet-num-nuc-types` (str of an int)
         * how many nuclei types are to be detected. Depends on weights being used.
-    * `--hovernet_model_mode` (str)
+    * `--hovernet-model-mode` (str)
         * can be “original” or “fast”.
     * `--hovernet-run-function` (str) 
         * Default: “./run_infer.py”.
     * `--hovernet-batch-size` (str of an int)
         * what batch size should be used.
-    * `--data_saver_mode` (bool) 
+    * `--data-saver-mode` (bool) 
         * if data_saver_mode = True, temporary outputs are automatically deleted. Default = False.
 
 #### Example:
     python .\src\run_fat_and_nuclei_detection.py \
-        --input-dir "F:\test\test_img\"\
-        --output-dir "F:\test\test_cli"\
-        --output-folder-name "fat_and_nuclei_detection"\
-        --hovernet-dir "F:\test\hover_net-master"\
-        --hovernet-weights-file "F:\test\hover_net-master\hovernet_original_kumar_notype_tf2pytorch.tar"\
-        --WSI-file-type ".mrxs"\
-        --WSI-queue "test_img_HE.mrxs"\
-        --patch-size "1500"\
-        --patch-level "0"\
-        --min-fat-vesicle-area "40"\
-        --max-fat-vesicle-area "10000"\
-        --min-extent "0.5"\
-        --max-axis-ratio "2"\
-        --subpatch-size-factor "20"\
-        --disk "8.35"\
-        --run-hovernet\
-        --hovernet-gpu "0"\
-        --hovernet-num-nuc-types "0"\
-        --hovernet-model-mode "original"\
-        --hovernet-run-function "./run_infer.py"\
-        --hovernet-batch-size "128"\
-        --data-saver-mode
+        --input-dir "F:\test\test_img\" \
+        --output-dir "F:\test\test_cli" \
+        --output-folder-name "fat_and_nuclei_detection" \
+        --hovernet-dir "F:\test\hover_net-master" \
+        --hovernet-weights-file "F:\test\hover_net-master\hovernet_original_kumar_notype_tf2pytorch.tar" \
+        --WSI-file-type ".mrxs" \
+        --WSI-queue "test_img_HE.mrxs" \
+        --patch-size "1500" \
+        --patch-level "0" \
+        --min-fat-vesicle-area "40" \
+        --max-fat-vesicle-area "10000" \
+        --min-extent "0.5" \
+        --max-axis-ratio "2" \
+        --subpatch-size-factor "20" \
+        --disk "8.35" \
+        --run-hovernet \
+        --hovernet-gpu "0" \
+        --hovernet-num-nuc-types "0" \
+        --hovernet-model-mode "original" \
+        --hovernet-run-function "./run_infer.py" \
+        --hovernet-batch-size "128" \
+        --data-saver-mode 
 
 
 #### Output:
@@ -116,25 +116,25 @@ Each file is processed, and output for each file is stored in various dataframes
 * location: `[output-dir]/[output-folder-name]/[file_name]/dataframes/`
     * `[file_name]_data.csv` (dataframe)
         * contains data about each potential fat object that was detected, as well as information about the processed patch.
-    * [file_name]_subpatch_df.pkl (dataframe)
+    * `[file_name]_subpatch_df.pkl` (dataframe)
         * splits the processed patch into smaller patches, to allow for more granular data analysis.
     * If nucleus information is gathered:
-        * [file_name]_raw_global.pkl (dataframe)
+        * `[file_name]_raw_global.pkl` (dataframe)
             * contains all detected nuclei, even those in unscanned areas.
-        * [file_name] _relevant_nuclei.pkl (dataframe)
+        * `[file_name] _relevant_nuclei.pkl` (dataframe)
             * contains only nuclei that lie in regions with relevant detected tissue.
-        * [file_name]_fat_and_nucs.pkl (dataframe)
+        * `[file_name]_fat_and_nucs.pkl` (dataframe)
             * contains combined information about fat, tissue area and detected nuclei. This dataframe is required in order to run nucleus cluster analysis. To generate _fat_and_nucs_df.pkl, the WSI must also be processed as subpatches (that means `SUBPATCH_SIZES` must be a list with a length of at least one).
-* location: [`output-dir`]/[`output-folder-name`]/[`file_name`]/saved_patches
-    * /fat_patches/
+* location: `[output-dir]/[output-folder-name]/[file_name]/saved_patches`
+    * `/fat_patches/`
         * contains a binary mask of objects determined to be fatty vesicles.
-    * /binary_patches/
+    * `/binary_patches/`
         * contains a binary mask of detected tissue.
-* location: [`output-dir`]/[`output-folder-name`]/[`file_name`]/temporary_data
-    * /[`int_of_batch_number`]/
-        * /generated_output/
+* location: `[output-dir]/[output-folder-name]/[file_name]/temporary_data`
+    * `/[int_of_batch_number]/`
+        * `/generated_output/`
             * location of the generated nucleus information.
-        * /original_patches/
+        * `/original_patches/`
             * contains the .tif files of the processed patch. To save memory, these images are automatically deleted if data-saver-mode is activated.
 
 
@@ -144,42 +144,43 @@ This code takes information about nuclei location (information gained by enablin
 
 
 #### Environment
-* Numpy v 1.20.2
-* openslide-python v 3.3
-* scikit-image v 0.18.1
-* pandas v 1.2.4
-* scipy v 1.6.2
-* PIL v 8.2.0
-* json5 v 0.9.6
-* Matplotlib v 3.3.4
-* networkX v 2.5.1
+* Numpy v1.20.2
+* openslide-python v3.3
+* scikit-image v0.18.1
+* pandas v1.2.4
+* scipy v1.6.2
+* PIL v8.2.0
+* json5 v0.9.6
+* Matplotlib v3.3.4
+* networkX v2.5.1
 
 
 #### Usage:
-To start: execute run_nucleus_cluster_analysis.py. Fat and Nucleus Detection Script must be executed first!
+To start: execute `python .\src\run_nucleus_cluster_analysis.py`.
+>Note: Fat and Nucleus Detection Script must be executed first!
 
 #####  Parameters:
-* `data-dir` (str) 
-    * path to output of Fat and Nuclei Detection Script, i.e [`output-dir`]/[`output-folder-name`]. This folder should contain a folder for each processed WSI, as described in the output description of the Fat and Nucleus Detection Readme.
-* `max-distance` (int) 
+* `--data-dir` (str) 
+    * path to output of Fat and Nuclei Detection Script, i.e `[output-dir]/[output-folder-name]/`. This folder should contain a folder for each processed WSI, as described in the output description of the Fat and Nucleus Detection README.
+* `--max-distance` (int) 
     *  maximum distance (in µm) between nuclei to still be considered neighbors. Default: 15 µm.
-* `output-folder-name` (str) 
+* `--output-folder-name` (str) 
     * name of experiment, used to generate a folder to store results.
 
 #### Example:
-    python run_nucleus_cluster_analysis.py\
-    --data-dir "F:\test\test_cli\fat_and_nuclei_detection_results\"\
-    --max-distance 15\
-    --output-folder-name "test_cluster"
+    python run_nucleus_cluster_analysis.py \
+        --data-dir "F:\test\test_cli\fat_and_nuclei_detection_results\" \
+        --max-distance 15 \
+        --output-folder-name "test_cluster"
 
 
 
 #### Output
 For each WSI that is processed, nuclei are clustered, and information about clusters is gathered ("graph stats"). Additionally, information about nucleus location and cluster area (after removing fatty objects that lay within cluster bounds) is stored. For more information about how to use output, see nucleus_cluster_analysis_data_analysis_example.ipynb
-* location: [`data-dir`]/[`file_name`]/nucleus_cluster_analysis/[`output-folder-name`]/
-    * [file_name]_[`output-folder-name`]_clusters.pkl (lst of lsts).
+* location: `[data-dir]/[file_name]/nucleus_cluster_analysis/[output-folder-name]/`
+    * `[file_name]_[output-folder-name]_clusters.pkl` (lst of lsts).
         * a list of components. Each component contains a list of each nucleus coordinate in that cluster.
-    * [file_name]_[`output-folder-name`]_graph_stats.pkl (lst of lsts)
+    * `[file_name]_[output-folder-name]_graph_stats.pkl` (lst of lsts)
         * structured as a list of lists of nucleus [information](https://networkx.org/documentation/stable/reference/functions.html). Note that graph_stats[1-8] lists each have the length = number of relevant nuclei detected:
             * graph_stats[0] = average clustering coefficient (list of a float with the length of one)<br>
             * graph_stats[1] = clustering coefficients (list)<br>
@@ -191,7 +192,7 @@ For each WSI that is processed, nuclei are clustered, and information about clus
             * graph_stats[7] = degree (list)<br>
             * graph_stats[8] = is nucleus in a cluster (list)<br>
     
-    * [file_name]_[`output-folder-name`]_global_CCA.pkl (dataframe)
+    * `[file_name]_[output-folder-name]_global_CCA.pkl` (dataframe)
         * this dataframe puts nuclei information on a global (ie WSI) scale. This dataframe contains information about fatty area, nuclei, and area of nuclei clusters.  
 
 
@@ -203,28 +204,28 @@ This script allows an analysis of the number of nuclei clusters in a given (squa
 * see Nucleus Cluster Analysis Script environment
 
 #### Usage: 
-* To start: execute run_inflammation_by_fov.py
-    * By adjusting function “find_20x_fov” you can change the size of FOV. In the script, a 20xFOV is ~1120 x 1120 µm<sup>2</sup>.
+* To start: execute `python .\src\run_inflammation_by_fov.py`
+    >You can change the size of the FOV by adjusting function “find_20x_fov”. In the script, a 20xFOV is ~1120 x 1120 µm<sup>2</sup>.
 
     * ##### Parameters
-        * `data-dir` (str) 
-            * path to output of Fat and Nuclei Detection Script, i.e [`output-dir`]/[`output-folder-name`]. 
-        * `CCA-folder-name` (str)
+        * `--data-dir` (str) 
+            * path to output of Fat and Nuclei Detection Script, i.e `[output-dir]/[output-folder-name]`. 
+        * `--CCA-folder-name` (str)
             * name of folder under which the Nucleus Cluster Analysis output is stored.
-        * `FOV_output` (str)
+        * `--FOV-output` (str)
             * Folder name to store the FOV results.
 
 #### Example:
-    python run_inflammation_by_fov.py\
-    --data-dir "F:\test\test_cli\fat_and_nuclei_detection_results\"\
-    --CCA-folder-name "test_cluster"\
-    --FOV_output "20xFOV"\
+    python run_inflammation_by_fov.py \
+        --data-dir "F:\test\test_cli\fat_and_nuclei_detection_results\" \
+        --CCA-folder-name "test_cluster" \
+        --FOV_output "20xFOV" \
 
 
 #### Output
 For each WSI that is processed, a dataframe containing the coordiantes of the FOV and the number of centroids within the FOV is generated.
-*  location: [`data-dir`]/[`FOV_output`]/
-    * [file_name]_foki_per_20xfov.pkl 
+*  location: `[data-dir]/[FOV_output]/`
+    * `[file_name]_foki_per_20xfov.pkl` 
 
 
 ### CPA Analysis
@@ -232,61 +233,57 @@ This script analyzes the collagen proportionate area (CPA) in Masson's Trichrome
 
 #### Environment
 * see Fat and Nuclei Detection environment
-* scikit-learn v 0.24.2
+* scikit-learn v0.24.2
 
 #### Usage:
-* To start: execute run_CPA_anlaysis.py
+* To start: execute `python .\src\run_CPA_anlaysis.py`.
 
 #####  Parameters:
-* `output-folder-name` (str)
+* `--output-folder-name` (str)
     * name of folder to store outputs under.
-* `output-dir` (str) 
+* `--output-dir` (str) 
     * where you want the outputs to be stored.
-* `input-dir` (str) 
+* `--input-dir` (str) 
     * where the files you want to process are located.
-* `WSI-file-type` (str) 
+* `--WSI-file-type` (str) 
     * can be “.mrxs” or “.czi”.
-* `WSI-queue` (list of str) 
+* `--WSI-queue` (list of str) 
     * a list of all the images in the file_loc that you wish to process. If imgs_to_process = [], all files with FILE_TYPE in file_loc are processed.
-* `PATCH_SIZE` (int) 
+* `--patch-size` (int) 
     * patch size in micrometers. Patches are always processed in square. Default is 1500x1500 µm<sup>2</sup>.
-* `PATCH_LEVEL` (int) 
+* `--patch-level` (int) 
     * level at which patches are processed. Default is 0.
-* `MIN_AREA` (int) 
+* `--min-area` (int) 
     * in µm<sup>2</sup>. Smallest size of a macrovesicular fat vesicle. Default is 40 µm<sup>2</sup>.
-* `MAX_AREA` (int)
+* `--max-area` (int)
     * in µm<sup>2</sup>. Maximum area of fat vesicle. Default is 10000 µm<sup>2</sup>. Keep in mind that fatty objects can be connected into one big object.
-* `MIN_EXTENT` (int)
+* `--min-extent` (int)
     * minimum extent of a fat vesicle. Default is 0.5.
-* `FILL_FG_SIZE` (int)
-    * fills in objects in the foreground. Default: is calculated from MIN_AREA.
-* `FILL_BG_SIZE` (int) 
-    * fills in objects in the background. Default: is calculated from MAX_AREA.
-* `MAX_AXIS_RATIO` (int) 
+* `--max-axis-ratio` (int) 
     * maximum axis ratio of a fat vesicle. Default: 2.
-* `DISK`(float, in µm)
+* `--disk` (float, in µm)
     * Kernel used image preprocessing. Default: 8.3478513356562.
 
 #### Example:
 
     python .\src\run_CPA_analysis.py \
-    --input-dir "F:\test\test_img\" \
-    --output-dir "F:\test\test_cli"` \
-    --output-folder-name "CPA" \
-    --WSI-file-type ".mrxs" \
-    --WSI-queue "test_img_HE.mrxs" \
-    --patch-size "1500" \
-    --patch-level "0" \
-    --min-fat-vesicle-area "40" \
-    --max-fat-vesicle-area "10000"\
-    --min-extent "0.5" \
-    --max-axis-ratio "2" \
-    --disk "8.35" \
+        --input-dir "F:\test\test_img\" \
+        --output-dir "F:\test\test_cli" \
+        --output-folder-name "CPA" \
+        --WSI-file-type ".mrxs" \
+        --WSI-queue "test_img_HE.mrxs" \
+        --patch-size "1500" \
+        --patch-level "0" \
+        --min-fat-vesicle-area "40" \
+        --max-fat-vesicle-area "10000"\
+        --min-extent "0.5" \
+        --max-axis-ratio "2" \
+        --disk "8.35" \
 
 #### Output
 For each WSI that is processed, a dataframe with the analysis data is saved. Additionally, binary masks of tissue and fat objects are saved, which can be useful for plotting and further analysis. To see examples how to use generated data, see CPA_data_analysis_example.ipynb.
-* [`output-dir`]/[`output-folder-name`]/dataframes
-    * [file_name]_CPA.pkl (dataframe)
+* `[output-dir]/[output-folder-name]/dataframes/`
+    * `[file_name]_CPA.pkl` (dataframe)
         * contains the following information on a patch-wise basis:
             * WSI information:
                 * `name` name of file processed.
